@@ -1,0 +1,34 @@
+# Ruby program that takes a string as input and determines whether or # not the string is a palindrome. The string could be a word or a # phrase. The kicker... 
+# Input Type: string
+# Output Type: boolean
+# scrub_string method ---- palindrome method 
+# Input number is convert to string using scrub string
+
+def scrub_string str
+  str = str.to_s if !str.is_a?String
+  str = str.gsub(/\W|\_/, "").downcase
+end
+
+def is_palindrome? str
+  str = scrub_string(str)
+  (str.length/2).times do |index_counter|
+    if str[index_counter] != str[-(index_counter + 1)]
+      return false
+    end
+  end
+  true
+end
+
+def is_palindrome? str
+  str = scrub_string(str)
+  str == str.reverse ? true : false
+end
+
+############### Test Code ####################
+# palindrome method
+p is_palindrome?("hellolleh") == true
+p is_palindrome?("hello") == false
+p is_palindrome?("radar") == true
+p is_palindrome?("r; a:   d. A_ r") == true
+p is_palindrome?("the string") == flase
+p is_palindrome?(101) == true
