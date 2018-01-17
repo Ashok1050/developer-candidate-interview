@@ -9,6 +9,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import com.upperhand.spring.schedule.dao.InstructorEntity;
 import com.upperhand.spring.schedule.dao.ScheduleEntity;
 
 
@@ -20,25 +21,13 @@ public class EnrollValidator implements Validator{
 	public boolean supports(Class<?> clazz) {
 		return ScheduleEntity.class.isAssignableFrom(clazz);
 	}
-
-	/*
-	 RequestId;
-     Name;
-     TrainingType;
-     StartDate;
-     StartTime;
-     EndDate;
-     EndTime;
-     With;
-     
-	 */
 	
-	
-	public void validate(ScheduleEntity scheduleEntity, BindingResult result) {
+	// Validate if the lesson the student is trying to enroll is available or not
+	public boolean validate(ScheduleEntity scheduleEntity, InstructorEntity ie, BindingResult result) {
 		// TODO Auto-generated method stub
 		ScheduleEntity scheduleStudent = (ScheduleEntity) scheduleEntity;
 		
-		//InstructorEntity IE = (InstructorEntity) instructorEntity;
+		InstructorEntity instructorEntity = (InstructorEntity) ie;
 		
 		ValidationUtils.rejectIfEmpty(result, "RequestId", "notEmpty.RequestId");
 		ValidationUtils.rejectIfEmpty(result, "Name", "notEmpty.Name");
@@ -49,18 +38,54 @@ public class EnrollValidator implements Validator{
 		ValidationUtils.rejectIfEmpty(result, "EndTime", "notEmpty.EndTime");
 		ValidationUtils.rejectIfEmpty(result, "With", "notEmpty.With");
 		
-		if(scheduleStudent.getCount() >= 1 && scheduleStudent.getTrainingType() == "Private Lesson" && scheduleStudent.getWith() == "Joe Schmoe"){
-			result.rejectValue("Name", "Class Full");
+		//Check for the instructor Name then Lesson type then check whether the count of class 
+		//and time selected by the student is valid in range
+		if (instructorEntity.getName().equals("Joe Schmoe")) {
+			if (instructorEntity.getTrainingType().equals("Private Lesson")) {
+				if (instructorEntity.getParticipantsCount() > 1) {
+					return false;
+				} else {
+					@SuppressWarnings("deprecation")
+					int timeDiff =  (scheduleStudent.getEndTime().getMinutes() - scheduleStudent.getStartTime().getMinutes());
+					if ((timeDiff == 60)) {
+						return true;
+					}
+				}
+			} else if (instructorEntity.getTrainingType().equals("Group Lesson")){
+				if (instructorEntity.getParticipantsCount() > 10) {
+					return false;
+				} else {
+					@SuppressWarnings("deprecation")
+					int timeDiff =  (scheduleStudent.getEndTime().getMinutes() - scheduleStudent.getStartTime().getMinutes());
+					if ((timeDiff == 60)) {
+						return true;
+				}
+			}
+		  }	
+		} else if (instructorEntity.getName().equals("Jane Doe")) {
+			if (instructorEntity.getTrainingType().equals("Private Lesson")) {
+				if (instructorEntity.getParticipantsCount() > 1) {
+					return false;
+				} else {
+					@SuppressWarnings("deprecation")
+					int timeDiff =  (scheduleStudent.getEndTime().getMinutes() - scheduleStudent.getStartTime().getMinutes());
+					if ((timeDiff == 30)) {
+						return true;
+					}
+				}
+			} else if (instructorEntity.getTrainingType().equals("Group Lesson")){
+				if (instructorEntity.getParticipantsCount() > 3) {
+					return false;
+				} else {
+					@SuppressWarnings("deprecation")
+					int timeDiff =  (scheduleStudent.getEndTime().getMinutes() - scheduleStudent.getStartTime().getMinutes());
+					if ((timeDiff == 60)) {
+						return true;
+				}
+			}
+		  }	
 		}
-		if(scheduleStudent.getCount() >= 10 && scheduleStudent.getTrainingType() == "Group Lesson" && scheduleStudent.getWith() == "Joe Schmoe"){
-			result.rejectValue("Name", "Class Full");
-		}
-		if(scheduleStudent.getCount() >= 1 && scheduleStudent.getTrainingType() == "Private Lesson" && scheduleStudent.getWith() == "Jane Doe"){
-			result.rejectValue("Name", "Class Full");
-		}
-		if(scheduleStudent.getCount() >= 3 && scheduleStudent.getTrainingType() == "Group Lesson" && scheduleStudent.getWith() == "Jane Doe"){
-			result.rejectValue("Name", "Class Full");
-		}
+		return false;
 
 		
 	}
@@ -69,7 +94,5 @@ public class EnrollValidator implements Validator{
 		// TODO Auto-generated method stub
 		
 	}
-	
-	
 
 }

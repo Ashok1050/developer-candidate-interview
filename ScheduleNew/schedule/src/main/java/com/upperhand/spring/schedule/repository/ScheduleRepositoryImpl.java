@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import com.upperhand.spring.schedule.dao.InstructorEntity;
 import com.upperhand.spring.schedule.dao.ScheduleEntity;
 import com.upperhand.spring.schedule.exception.BadRequestException;
 
@@ -20,6 +21,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
 
 	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
+	@Autowired
+	InstructorEntity instructorEntity;
 	
 	@Autowired
 	public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -28,15 +31,25 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
 	
 	
 	public void addToStudentList(ScheduleEntity scheduleEntity) {
-
-		String sql = "update schedule set RequestId=:RequestId, Name=:Name, TrainingType=:TrainingType, StartDate=:StartDate,"
-				+ " StartTime=:StartTime, EndDate=:EndDate, EndTime=:EndTime, With=:With,"
-				+ " where RequestId = :RequestId";
+		int requestId = scheduleEntity.getRequestId();
+		requestId++;
 		
-			namedParameterJdbcTemplate.update(sql, getSqlParameterSource(scheduleEntity));
-        
-	}
+		// SQL query to insert a record in the ScheduleEntity class --- Schedule Table
+		String sql = "insert schedule set RequestId=:RequestId, Name=:Name, TrainingType=:TrainingType, StartDate=:StartDate,"
+				+ " StartTime=:StartTime, EndDate=:EndDate, EndTime=:EndTime, With=:With,"
+				+ " where RequestId = " + requestId;
+		namedParameterJdbcTemplate.update(sql, getSqlParameterSource(scheduleEntity));
 
+		int participantCount = instructorEntity.getParticipantsCount();
+		participantCount++;
+		
+		//SQL query to update a record in the InstructorEntity class --- Instructor_availability Table
+		String instructorSql = "update Instructor_availability set participantsCount=" +participantCount+
+				"where name=:With and TrainingType=:TrainingType and StartDate=:StartDate and EndDate=:EndDate";
+		namedParameterJdbcTemplate.update(instructorSql, getSqlParameterSourceInstructorEntity(instructorEntity));
+		
+	}
+/*
 	private static final class ScheduleMapper implements RowMapper<ScheduleEntity>{
 
 		public ScheduleEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -56,7 +69,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
 		
 	}
 		
-	
+	*/
 	public ScheduleEntity getScheduleById(int RequestId) {
 		
 		String sql = "select RequestId, Name, TrainingTtpe, StartDate, StartTime, EndDate, EndTime,"
@@ -84,6 +97,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
         
 	}
 	
+	//Add Data to the Entity -> ScheduleEntity -- Table -> Schedule
 	private SqlParameterSource getSqlParameterSource(ScheduleEntity schedule){
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 		parameterSource.addValue("RequestId", schedule.getRequestId());
@@ -94,25 +108,20 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
 		parameterSource.addValue("EndDate", schedule.getEndDate());
 		parameterSource.addValue("EndTime", schedule.getEndTime());
 		parameterSource.addValue("With", schedule.getWith());
+		return parameterSource;
+	}
+	
+	// Add Data to the Entity -> InstructorEntity -- Table -> Instructor_availability
+	private SqlParameterSource getSqlParameterSourceInstructorEntity(InstructorEntity instructor){
+		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+		parameterSource.addValue("Name", instructor.getName());
+		parameterSource.addValue("TrainingType", instructor.getTrainingType());
+		parameterSource.addValue("StartDate", instructor.getStartDate());
+		parameterSource.addValue("StartTime", instructor.getStartTime());
+		parameterSource.addValue("EndDate", instructor.getEndDate());
+		parameterSource.addValue("EndTime", instructor.getEndTime());
+		parameterSource.addValue("participantsCount", instructor.getParticipantsCount());
 		
-		int a = schedule.getCount();
-		if(a <= 10 && schedule.getTrainingType() == "Group Lesson" && schedule.getWith() == "Joe Schmoe"){
-			a++;
-			schedule.setCount(a);
-		}else if(a <= 1 && schedule.getTrainingType() == "Private Lesson" && schedule.getWith() == "Joe Schmoe"){
-			a++;
-			schedule.setCount(a);
-		}else if(a <= 3 && schedule.getTrainingType() == "Group Lesson" && schedule.getWith() == "Jane Doe"){
-			a++;
-			schedule.setCount(a);
-		}else if(a <= 1 && schedule.getTrainingType() == "Private Lesson" && schedule.getWith() == "Jane Doe"){
-			a++;
-			schedule.setCount(a);
-		}else {
-			throw new BadRequestException("The class you are trying to enroll is full");
-		}
-		
-		parameterSource.addValue("", schedule.getCount());
 		return parameterSource;
 	}
 

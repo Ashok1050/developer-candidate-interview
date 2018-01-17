@@ -18,7 +18,16 @@ public class InstructorEntity {
 	private Time StartTime;
 	private Time EndTime;
 	private String Duration;
+	private int participantsCount;
 	
+	public int getParticipantsCount() {
+		return participantsCount;
+	}
+
+	public void setParticipantsCount(int participantsCount) {
+		this.participantsCount = participantsCount;
+	}
+
 	public String getName() {
 		return Name;
 	}

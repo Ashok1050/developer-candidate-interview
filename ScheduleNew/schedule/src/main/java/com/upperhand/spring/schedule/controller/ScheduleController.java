@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.upperhand.spring.schedule.dao.InstructorEntity;
 import com.upperhand.spring.schedule.dao.ScheduleEntity;
 import com.upperhand.spring.schedule.exception.BadRequestException;
 import com.upperhand.spring.schedule.service.ScheduleService;
@@ -22,14 +23,17 @@ public class ScheduleController {
 	
 	@Autowired
 	private ScheduleService scheduleService;
+	
+	@Autowired
+	InstructorEntity instructorEntity;
 
 
 	@RequestMapping(value = "/enroll", method=RequestMethod.POST)
 	public void register(@ModelAttribute("scheduleEntity") ScheduleEntity scheduleEntity, BindingResult result, RedirectAttributes redirectAttributes){
 		
-		enrollValidator.validate(scheduleEntity,result);
+		boolean enrollSuccess = enrollValidator.validate(scheduleEntity,instructorEntity,result);
 		
-		if(result.hasErrors()){
+		if(enrollSuccess){
 			scheduleService.enroll(scheduleEntity);
 		}else{
 			//throw new BadRequestException("The time slot you are trying to schedule is full");

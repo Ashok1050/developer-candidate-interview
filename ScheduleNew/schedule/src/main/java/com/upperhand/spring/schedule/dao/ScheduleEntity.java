@@ -20,22 +20,13 @@ public class ScheduleEntity {
      private Date EndDate;
      private Time EndTime;
      private String With;
-     private int count;
-     
-     public int getCount() {
-		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
-	}
-
+    
 	public ScheduleEntity(){
     	 
      }
      
      public ScheduleEntity(int requestId, String name, String trainingType, Date startDate, Time startTime,
-    		 Date endDate, Time endTime, String with, int count) {
+    		 Date endDate, Time endTime, String with) {
  		
  		this.RequestId = requestId;
  		this.Name = name;
@@ -45,7 +36,6 @@ public class ScheduleEntity {
  		this.EndDate = endDate;
  		this.EndTime = endTime;
  		this.With = with;
- 		this.count = count;
  	}
 
 	public int getRequestId() {
