@@ -1,0 +1,13 @@
+# Ruby program that takes a string as input and determines whether or # not the string is a palindrome. The string could be a word or a # phrase. The kicker... 
+# Input Type: string
+# Output Type: boolean
+
+
+pal = "Never a foot too far, even."
+class String
+  def palindrome?
+    letters = self.downcase.scan(/\w/)
+    letters == letters.reverse
+  end
+end
+pal.palindrome? #=> true
